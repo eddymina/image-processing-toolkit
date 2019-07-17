@@ -1,0 +1,81 @@
+Code Layout::
+
+-- color_adjust --
+
+
+	rgb2bgr(RGB)
+
+	bgr2rgb(BGR)
+
+	rgb2gray(rgb)
+
+	color_isolation(self,plot=False)
+
+	intensity_plot(self)
+
+	grey_level_adjust(self,grey_levels)
+
+
+-- im_processing -- + Fourier Analysis Class 
+
+	cv_read(file_path)
+
+	plot_grey(im)
+
+	plot_hist(gray)
+
+	im_subplot(ims,shape,titles=None,cmap= 'gray')
+
+	zero_pad(pad_len=2)
+
+	hist_density(gray,thresh=128)
+
+	zoom_dup(self,factor=2)
+
+	crop(img, x_left=0,x_right=0,y_bot=0,y_up=0)
+
+	cut(img,thresh=90)
+
+	resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+
+-- segmentation -- 
+
+	otsu(gray,plot=False):
+
+	remove_background_noise(img, dilations=1, kernel_size=5, thresh=174)
+
+	kmeans_segmenter(img,clusters)
+
+	watershed
+
+	grab_contours(cnts)
+
+	order_points(pts):
+
+	four_point_transform(image, pts):
+
+
+-- kernel -- 
+
+	cv_convolve
+
+	np_convolve 
+
+	sharpen(self):
+
+	excessive(self)
+
+	edge_enhance(self)
+
+	sharpen_filter(self)
+
+	edge_filter(self)
+
+	gaussian_filter(self,kernel_size= 3 ,sigma=1)
+
+	edge_finder (it sucks) 
+
+
+-- yolo -- 
+
+	yolo.py 
