@@ -1,11 +1,13 @@
 # image-processing-toolkit
 
+(beta)
+
 
 This is a simple image processing tool kit. It works by creating useful functions as well making pretrained classifiers easy to use. 
 
 ### Face Detection 
 
-Simple face deteection module using openCV + caffee pretrained models 
+Simple face detection module using openCV + caffee pretrained models 
 ```python
 import image_processing as imp
 from image_processing  import im_processing,color_adjust 
@@ -121,10 +123,49 @@ imp.im_subplot(ims,shape=[2,3],titles=titles) #plot img subplot for comparison
 </p>
 
 
+###color_adjust
+Color adjustment module with various functions including RGB conversion
+
+```python
+
+import image_processing as imp
+from image_processing  import im_processing,color_adjust,im_processing
+import matplotlib.pyplot as plt
+import numpy as np
+
+img = imp.im_processing.cv_read('images/einstein.jpg') #load RGB
+
+gray= color_adjust.rgb2gray(img)
+
+R,G,B= color_adjust.color_isolation(img)
+
+dim = np.zeros(img.shape[0:2]).astype(int)
+R,G,B=np.stack((R,dim,dim), axis=2),np.stack((dim,G,dim), axis=2),np.stack((dim,dim,B), axis=2)
+
+mean = color_adjust.mean_subtraction(img)
+
+gray_adj = color_adjust.grey_level_adjust(gray,grey_levels=100)
 
 
+ims= [img,gray_adj,gray,mean,R,G,B]
 
+titles= ["Original Image",'Grey Bit Adjustment',"Gray Scaled",'Mean Subtraction',
+"Red", "Green","Blue"]
 
+color_adjust.intensity_plot(im_processing.resize(gray,300,300)) #v
+
+plt.suptitle("Some Tools in Color_Adjust Lib")
+imp.im_subplot(ims,shape=[3,3],titles=titles) #plot img subplot for comparison 
+```
+
+<p align="center"> 
+<img src="images/einstein_plots.png">
+</p>
+<p align="center"> 
+<img src="images/intensity_plot.png">
+</p>
+
+#### Stay tuned for fourier analysis and segmentation 
 
 
 
