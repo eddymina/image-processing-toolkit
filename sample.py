@@ -1,77 +1,31 @@
-import image_processing as imp
-from image_processing  import im_processing,color_adjust,segmentation,kernel
-from image_processing.face_detection import detect_faces
-import numpy as np 
-import cv2
+import image_processing as imp 
+from image_processing import fourier_analysis,im_processing
+
+###create an image with black lines  
+vert_lines = fourier_analysis.gen_line_im(size=(100,100),samp_freq=5,vert=True,balance = True) 
+horiz_lines= fourier_analysis.gen_line_im(size=(100,100),samp_freq=5,vert=False,balance = True) 
+checker= fourier_analysis.gen_line_im(size=(100,100),samp_freq=5,checker= True) 
+rotated = im_processing.rot45(vert_lines)
+box= fourier_analysis.gen_square_im(size=(100,100),n=2,val=1)
 
 
-img = cv2.imread('image_processing/face_detection/test.jpg')
-print('sdfds')
+ims = [vert_lines,horiz_lines,checker,rotated,box]
+ims = [fourier_analysis.im_noise(im).poisson() for im in ims]
+titles= ['vert_lines','horiz_lines','checker','rotated45','square']
+
+ims.extend([fourier_analysis.magnitude_spectrum(img) for img in ims])
+
+titles.extend([t +' FFT' for t in titles])
 
 
-detected = detect_faces.detect(img,'image_processing/face_detection/deploy.prototxt.txt',
-	'image_processing/face_detection/res10_300x300_ssd_iter_140000.caffemodel',.12)
-
-imp.cv_plot(detected)
-
-
-
-# import image_processing.im_processing as imp
-# from image_processing.yolo import yolo
-
-
-# img = cv2.imread('image_processing/images/img.jpg',cv2.COLOR_BGR2GRAY)
-# print(img.shape)
-
-# img = imp.resize(img,img.shape[0]//2,img.shape[1]//2)
-
-# print(img.shape)
-
-
-# warped = segmentation.convert_object(img)
+imp.im_subplot(ims,shape=[2,5],titles=titles,
+	suptitle='Understanding Fast Fourier Transforms (FFT)')
 
 
 
 
 
-# img= im_processing.cut(img,thresh=150)
-
-
-# plt.figure(figsize= (30,30)
-# imp.plot_grey(segmentation.otsu(img)[1])
-
-
-# ims= [img,kernel.edge_filter(img)]
-# imp.im_subplot(ims)
-
-
-
-# ims = [img,color_adjust.grey_level_adjust(img,100)]
-
-# imp.im_subplot(ims)
-
-# imp.plot_grey(image)
-
-
-# print(image.shape)
-#yolo_path ='image_processing/yolo/'
-# frame = yolo.predict(image, model = yolo_path + 'yolov2.weights', config= yolo_path +'yolov2.cfg')
-
-
-
-# import matplotlib.pyplot as plt 
-# import torch 
-
-# time = np.arange(-np.pi,np.pi,.01)
-# y = np.cos(time)
-
-# print(y.shape)
-# plt.plot(time,y)
-# plt.show()
-
-
-
-
+# ims= [i, spectrum(i,plot=False)]
 
 
 

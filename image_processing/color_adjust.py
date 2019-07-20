@@ -16,8 +16,6 @@ import cv2
 import matplotlib.pyplot as plt 
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
-from image_processing.im_processing import im_subplot
-# from scipy import fftpack
 
 def rgb2gray(rgb):
     r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
@@ -34,8 +32,17 @@ def bgr2rgb(BGR):
 	B,G,R= BGR[:,:,0],BGR[:,:,1],BGR[:,:,2]
 	return np.stack([R,G,B], axis=2)
 
+def rgb2yiq(RGB,norm=True):
+	if norm:
+		RGB=RGB/255.0
+	R,G,B=RGB[:,:,0],RGB[:,:,1],RGB[:,:,2]
+	y = (0.299*R + 0.587*G + 0.114*B)
+	i = (0.59590059*R -0.27455667*G -0.32134392*B)
+	q = (0.21153661*R -0.52273617*G + 0.31119955*B)
+	return np.stack([y,i,q], axis=2)
 
-def color_isolation(img,plot=False):  
+
+def color_isolation(img):  
 	"""
 	Takes in an image and isolates it into 
 	R,G,B color counter parts. 
@@ -49,13 +56,10 @@ def color_isolation(img,plot=False):
 	else:
 	    R,G,B=img[:,:,0],img[:,:,1],img[:,:,2]
 
-
-	if plot ==True:
-		plt.figure(figsize=(12,10))
-		im_subplot ([np.stack((R,dim,dim), axis=2),np.stack((dim,G,dim), axis=2),
-	            np.stack((dim,dim,B), axis=2)],shape=[1,3], 
-	           titles=['R','G','B'] )
-
+	# if plot ==True:
+	# 	im_subplot ([np.stack((R,dim,dim), axis=2),np.stack((dim,G,dim), axis=2),
+	#             np.stack((dim,dim,B), axis=2)],shape=[1,3], 
+	#            titles=['R','G','B'] )
 	
 	return R,G,B
 
@@ -98,6 +102,12 @@ def grey_level_adjust(img,grey_levels):
 	grey_levels=abs(grey_levels)
 
 	return (img/grey_levels).astype(int)*grey_levels
+
+
+
+
+
+
 
 
 

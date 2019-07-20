@@ -30,7 +30,10 @@ def np_convolve(image, kernel):
                 new_image[i][j] = np.sum(image[i:i+m, j:j+m]*kernel) 
     return new_image
 
-def cv_convolve(image,kernel):
+def cv_convolve2D(image,kernel):
+	"""
+	2D cv based convultion 
+	"""
 
 	return cv2.filter2D(image, -1, kernel)
 
@@ -49,7 +52,12 @@ def gaussian_filter(img,kernel_size= 3 ,sigma=1,high_pass=False):
 
 	if high_pass: return img - cv2.filter2D(img, -1, kernel)
 	else: return cv2.filter2D(img, -1, kernel)
+
 class edge_filter:
+	"""
+	Series of edge finding kernels
+
+	"""
 
 	def __init__(self,img):
 		self.img= img 
@@ -88,6 +96,9 @@ class edge_filter:
 		return cv2.filter2D(self.img, -1, kernel)
 
 class sharpen:
+	
+	#image sharpening kernels 
+
 	def __init__(self,img):
 		self.img = img.astype(np.uint8)
 

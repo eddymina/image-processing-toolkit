@@ -1,6 +1,6 @@
 
 ############################################
-# Im Processing::       			   	   #
+# Im Processing::                          #
 # Simple numpy based functions for image   #
 # restructuring and editing. It functions  #
 # for reading images, plotting,cropping,   #
@@ -99,7 +99,7 @@ def hist_density(gray,thresh=128):
 	his = np.histogram(gray, np.arange(0,257))[0]
 	return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
 
-def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
+def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True):
 	"""
 	Basic Subplotting Function. 
 	
@@ -108,16 +108,21 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
 	returns subplot of images plotting next to each other
 
 	"""
+
 	if shape == None:
 		shape = [1, len(ims)]
 	if titles == None:
 	    titles =[str(" ") for i in range(len(ims))]
+
+	if len(ims)!=len(titles):
+		raise ValueError('Number of Images must equal Number of Titles')
 	fig = plt.figure(1)
+	if suptitle: plt.suptitle(suptitle)
 	for i in range(1,len(ims)+1): 
 	    fig.add_subplot(shape[0],shape[1],i)
 	    plt.title(titles[i-1])
 	    plt.imshow(ims[i-1],cmap =cmap)
-	plt.show()
+	if plot: plt.show()
 
 
 def zoom_dup(img,factor=2):
@@ -181,7 +186,6 @@ def pad_with(img, pad_len=2, val=10):
 	pad image with set pad length and value 
 
 	"""
-
 	if pad_len==0:
 		return img 
 
@@ -201,4 +205,16 @@ def crop(img, x_left=0,x_right=0,y_bot=0,y_up=0):
 	"""
 	return img[y_up:img.shape[0]-y_bot, x_left:img.shape[1]-x_right]	
 
+def rot45(array):
+	"""
+	Crude Image 45 deg Rotation Function 
+	"""
+	rot = []
+	for i in range(len(array)):
+	    rot.append([1] * (len(array)+len(array[0])-1))
+	    for j in range(len(array[i])):
+	        #rot[i][int(i + j)] = array[i][j]
+	        rot[i][int(i + j)] = array[i][j]
+
+	return np.array(rot)
 

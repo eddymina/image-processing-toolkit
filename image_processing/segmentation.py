@@ -14,13 +14,20 @@
 
 # 	four_point_transform(image, pts):
 
-from image_processing.im_processing import cut
+
+#from image_processing.im_processing import cut
+#from image_processing.kernel import gaussian_filter
+#from image_processing.color_adjust import rgb2yiq
+from color_adjust import rgb2yiq,rgb2gray
+from kernel import gaussian_filter
 import numpy as np
 from sklearn.cluster import KMeans
 import cv2 
 
 
 def otsu(gray,plot=False):
+    if len(img.shape)>2:
+        img= rgb2gray(img)
 	pixel_number = gray.shape[0] * gray.shape[1]
 	mean_weight = 1.0/pixel_number
 	his, bins = np.histogram(gray, np.arange(0,257))
@@ -78,6 +85,95 @@ def kmeans_segmenter(img,clusters):
 		return seg_im.reshape(img.shape[0],img.shape[1], img.shape[2])
 	else:
 		return seg_im
+
+#Felzenszwalb segmenter 
+
+from skimage import data
+
+img= data.coffee()
+# gauss_yiq = rgb2yiq(gaussian_filter(img))
+
+import im_processing as imp
+# imp.plot_grey(gauss_yiq)
+
+def grey_segment(gray):
+
+    if len(gray.shape)>2:
+        gray= rgb2gray(gray)
+
+    copy= gray.copy()
+    print(gray.mean())
+
+    print(copy.min(),copy.max())
+    copy[copy > gray.mean()] = 3
+
+    imp.plot_grey(copy)
+
+
+    print(copy.min(),copy.max())
+    copy[(gray.mean() > copy) & (copy > .5)] = 2
+    imp.plot_grey(copy)
+    print(copy.min(),copy.max())
+    copy[(.5 > copy) & (copy > .25)] = 1
+    imp.plot_grey(copy)
+    print(copy.min(),copy.max())
+    copy[.25 > copy] = 0
+    print(copy.min(),copy.max())
+    return copy
+
+
+print(np.unique(grey_segment(img)))
+#imp.plot_grey(grey_segment(img))
+
+
+# def diff(red_band, green_band, blue_band, x1, y1, x2, y2):
+#     result = np.sqrt(np.square(red_band[y1, x1] - red_band[y2, x2]) + 
+#         np.square(green_band[y1, x1] - green_band[y2, x2]) +
+#         np.square(blue_band[y1, x1] - blue_band[y2, x2]))
+
+#     return result
+
+# z=.1
+# (w, h) = gauss_yiq.shape[:2]
+# edges_size = w * h * 4
+# edges = np.zeros(shape=(edges_size, 3), dtype=object)
+# num = 0
+# R,G,B = gauss_yiq[:,:,0],gauss_yiq[:,:,1],gauss_yiq[:,:,2]
+# for y in range(h):
+#     for x in range(w):
+#         if x < width - 1:
+#             edges[num, 0] = int(y * width + x)
+#             edges[num, 1] = int(y * width + (x + 1))
+#             edges[num, 2] = diff(R,G,B, x, y, x + 1, y)
+#             num += 1
+#         if y < height - 1:
+#             edges[num, 0] = int(y * width + x)
+#             edges[num, 1] = int((y + 1) * width + x)
+#             edges[num, 2] = diff(R,G,B, x, y, x, y + 1)
+#             num += 1
+
+#         if (x < width - 1) and (y < height - 2):
+#             edges[num, 0] = int(y * width + x)
+#             edges[num, 1] = int((y + 1) * width + (x + 1))
+#             edges[num, 2] = diff(R,G,B, x, y, x + 1, y + 1)
+#             num += 1
+
+#         if (x < width - 1) and (y > 0):
+#             edges[num, 0] = int(y * width + x)
+#             edges[num, 1] = int((y - 1) * width + (x + 1))
+#             edges[num, 2] = diff(R,G,B, x, y, x + 1, y - 1)
+#             num += 1
+# # Segment
+
+
+
+
+
+
+
+
+
+
 
 # def grab_contours(cnts):
 #     # if the length the contours tuple returned by cv2.findContours
