@@ -91,15 +91,26 @@ imp.im_subplot(ims,shape=[3,3],titles=titles) #plot img subplot for comparison
 Module with a variety of simple kernels ranging from gaussian to image sharpening 
 
 ```python 
+
 import image_processing as imp
 from image_processing  import im_processing,kernel
 import matplotlib.pyplot as plt
 
 img = imp.im_processing.cv_read('images/img_9.jpg') #load RGB 
 
-edged= kernel.edge_filter(img) #simple fast edge filter 
-
 guassian = kernel.gaussian_filter(img,kernel_size= 3 ,sigma=1) #guassian filter 
+
+edge = kernel.edge_filter(img) #simple fast edge filter 
+
+high_pass= edge.high_pass()
+
+schnarr= edge.schnarr_filter() #schnarr kernel 
+
+sobel_x= edge.sobel_x() #sobel_x filter 
+
+sobel_y= edge.sobel_y() #sobel_y filter 
+
+laplacian = edge.laplacian()
 
 sharp = kernel.sharpen(img) #sharpening class
 
@@ -109,13 +120,16 @@ sharpen = sharp.sharpen() #normal sharpen filted
 
 extreme = sharp.excessive() #excessive sharpening 
 
-ims= [img,edged,guassian,enhance,sharpen,extreme]
+ims= [img,guassian,enhance,sharpen,extreme,high_pass,schnarr,sobel_x,sobel_y,laplacian, 
+]
 
-titles= ["Original Image","Edge Filter","Guassian Filter",
-"Enhanced Img","Sharpened Img", "Exessive Sharpening"]
+titles= ["Original Image","Guassian Filter","Enhanced Img","Sharpened Img",
+ "Exessive Sharpening","High Pass Edge Filter",
+"Schnarr Edge Filter","sobel_x Edge Filter","sobel_y Edge Filter",
+"Laplacian Edge Filter"]
 
 plt.suptitle("Some Tools in Kernel Lib")
-imp.im_subplot(ims,shape=[2,3],titles=titles) #plot img subplot for comparison 
+imp.im_subplot(ims,shape=[3,4],titles=titles) #plot img subplot for comparison 
 ```
 
 <p align="center"> 
@@ -161,9 +175,15 @@ imp.im_subplot(ims,shape=[3,3],titles=titles) #plot img subplot for comparison
 <p align="center"> 
 <img src="images/einstein_plots.png">
 </p>
-<p align="center"> 
-<img src="images/intensity_plot.png">
-</p>
+
+#fourier analysis
+Fourier analysis toolkit with noise introduction, spectral analysis, high/low/pass filters. 
+
+
+Noise Distribution Class :: `im_noise(img)`
+
+- Gaussian: 
+- Poisson: 
 
 #### Stay tuned for fourier analysis and segmentation 
 
