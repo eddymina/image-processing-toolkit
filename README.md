@@ -269,10 +269,12 @@ titles= ['Orig Image','Gaussian Noise', 'Salt/Pepper Noise', 'Possion Noise','Sp
 
 imp.im_subplot(ims,titles=titles,suptitle='Noise') #compare 
 
+```
 <p align="center"> 
 <img src="images/noise.png">
 </p>
 
+```python
 ##Continued 
 
 ffts= [fourier_analysis.magnitude_spectrum(img) for img in ims] #get fft 2D
@@ -282,11 +284,10 @@ titles= [t+' FFT' for t in titles]
 imp.im_subplot(ffts,titles=titles,
 	suptitle='Noise Fast Fourier Transforms (FFT)')
 
+```
 <p align="center"> 
 <img src="images/noise_fft.png">
 </p>
-
-```
 
 
 #### Stay tuned for further fourier analysis, segmentation, and torch tools 
