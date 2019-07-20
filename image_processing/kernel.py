@@ -1,22 +1,9 @@
-# -- kernel -- 
-
-# 	cv_convolve
-
-# 	np_convolve 
-
-# 	sharpen(self):
-
-# 	excessive(self)
-
-# 	edge_enhance(self)
-
-# 	sharpen_filter(self)
-
-# 	edge_filter(self)
-
-# 	gaussian_filter(self,kernel_size= 3 ,sigma=1)
-
-# 	edge_finder (it sucks) 
+# ##################################
+# Simple Kernel Tool Kit. Includes #
+# a variety of functions that are  #
+# dedicated sharpening, isolating, #
+# and further processing images. ` #
+# ##################################
 
 import numpy as np 
 import cv2 
@@ -47,14 +34,8 @@ def cv_convolve(image,kernel):
 
 	return cv2.filter2D(image, -1, kernel)
 
-def edge_filter(img):
-	"""
-	Simple kernel for edge detection 
-	"""
-	kernel = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]).astype(float)
-	return cv2.filter2D(img, -1, kernel)
 
-def gaussian_filter(img,kernel_size= 3 ,sigma=1):
+def gaussian_filter(img,kernel_size= 3 ,sigma=1,high_pass=False):
 
 	"""
 	Apply (square) guassan kernel blur to image 
@@ -66,9 +47,45 @@ def gaussian_filter(img,kernel_size= 3 ,sigma=1):
 	normal = 1 / (2.0 * np.pi * sigma**2)
 	kernel = np.exp(-((x**2 + y**2) / (2.0*sigma**2))) * normal
 
-	return cv2.filter2D(img, -1, kernel)
+	if high_pass: return img - cv2.filter2D(img, -1, kernel)
+	else: return cv2.filter2D(img, -1, kernel)
+class edge_filter:
 
+	def __init__(self,img):
+		self.img= img 
+	def high_pass(self):
+		"""
+		Simple kernel for edge detection 
+		"""
+		kernel = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]).astype(float)
+		return cv2.filter2D(self.img, -1, kernel)
 
+	def schnarr_filter(self):
+		kernel = np.array([[-3, 0, 3],
+		                   [-10,0,10],
+		                   [-3, 0, 3]])
+		return cv2.filter2D(self.img, -1, kernel)
+
+	def sobel_x(self):
+		# sobel in x direction
+		kernel= np.array([[-1, 0, 1],
+		                   [-2, 0, 2],
+		                   [-1, 0, 1]])
+		return cv2.filter2D(self.img, -1, kernel)
+	def sobel_y(self):
+		# sobel in y direction
+		kernel = np.array([[-1,-2,-1],
+		                   [0, 0, 0],
+		                   [1, 2, 1]])
+		return cv2.filter2D(self.img, -1, kernel)
+
+	def laplacian(self):
+		# laplacian
+		kernel=np.array([[0, 1, 0],
+		                    [1,-4, 1],
+		                    [0, 1, 0]])
+
+		return cv2.filter2D(self.img, -1, kernel)
 
 class sharpen:
 	def __init__(self,img):

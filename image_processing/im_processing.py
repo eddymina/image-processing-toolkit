@@ -21,7 +21,6 @@
 # 	resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 import numpy as np
-from scipy import fftpack
 import cv2
 import matplotlib.pyplot as plt 
 import sys
@@ -65,13 +64,27 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
 		shape = [1, len(ims)]
 	if titles == None:
 	    titles =[str(" ") for i in range(len(ims))]
-	for i,im in enumerate(ims): 
-	    i+=1
-	    ct= shape[0]*100 + shape[1]*10 + i
-	    plt.subplot(ct)
+
+
+	fig = plt.figure(1)
+	for i in range(1,len(ims)+1): 
+	    fig.add_subplot(shape[0],shape[1],i)
 	    plt.title(titles[i-1])
-	    plt.imshow(im,cmap =cmap)
+	    plt.imshow(ims[i-1],cmap =cmap)
 	plt.show()
+
+# def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
+# 	if shape == None:
+# 		shape = [1, len(ims)]
+# 	if titles == None:
+# 	    titles =[str(" ") for i in range(len(ims))]
+# 	for i in range(shape[0]):
+# 		for j in range(shape[1]):
+# 			print(i,j)
+# 			# plt.subplot2grid((shape[0],shape[1]), (i,j))
+# 			# plt.title(titles[i-1])
+# 			# plt.imshow(ims[i],cmap =cmap)
+# 	plt.show()
 
 def zoom_dup(img,factor=2):
 
@@ -97,7 +110,6 @@ def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # if both the width and height are None, then return the original image
 
     if width is None and height is None:
-        print('fsd')
         return image
         # check to see if the width is None
     if width is None:
@@ -137,9 +149,13 @@ def crop(img, x_left=0,x_right=0,y_bot=0,y_up=0):
 
 
 
-
-
-
-
+#tues 11-11:30 
+# shape= 3,4
+# for i in range(1,15): 
+# 	ct= shape[0]*100 + shape[1]*10 + i
+# 	if ct % 10 !=0: 
+# 		print(ct)
+# 		continue 
+# 	print('e')
 
 
