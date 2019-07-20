@@ -1,71 +1,117 @@
-# -- im_processing -- + Fourier Analysis Class 
 
-# 	cv_read(file_path)
-
-# 	plot_grey(im)
-
-# 	plot_hist(gray)
-
-# 	im_subplot(ims,shape,titles=None,cmap= 'gray')
-
-# 	zero_pad(pad_len=2)
-
-# 	hist_density(gray,thresh=128)
-
-# 	zoom_dup(self,factor=2)
-
-# 	crop(img, x_left=0,x_right=0,y_bot=0,y_up=0)
-
-# 	cut(img,thresh=90)
-
-# 	resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+############################################
+# Im Processing::       			   	   #
+# Simple numpy based functions for image   #
+# restructuring and editing. It functions  #
+# for reading images, plotting,cropping,   #
+# thresholding, simple histogram analysis  #
+# zooming and resizing and padding. Basic  #
+# initial plotting and editing tools       #
+############################################
 
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
-import sys
+from .color_adjust import rgb2gray,bgr2rgb,rgb2bgr
+import warnings 
 
-# import any special Python 3 packages
-if sys.version_info.major == 3:
-    from urllib.request import urlopen
-
-
-
-def cv_read(file_path):
+def cv_read(file_path,RGB=True):
 	"""
-	Process and Image RGB not BGR 
+	Read jpg,jpeg,png image files. 
+	Can be read as RGB or default 
+	openCV read as BGR img. 
+
+	file_path:: path to img file 
+	RGB:: True --> return RGB, else BGR
 	"""
+
 	image= cv2.imread(str(file_path))
-	return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+	if image is None:
+		raise ValueError('No image found at {}'.format(file_path))
+	if RGB: return bgr2rgb(image)
+	else: return img 
 
-def plot_grey(im):
 
-    plt.imshow(im,cmap='gray')
-    plt.show()
+def plot_grey(im,title=None,xlabel=None,ylabel=None,convert_RGB=False):
+	"""
+	Simple matplotlib image plotter. 
+	Takes in simple matplotlib args 
+	and plots grays and colored images 
+	easier without having to specify. 
 
-def cv_plot(img,title= ' '):
+	im:: RGB image numpy array only
+	returns:img 
+	"""
+
+	if convert_RGB: img= bgr2rgb(img)
+	if title: 
+		plt.title(str(title))
+	elif xlabel: 
+		plt.xlabel(str(xlabel))
+	elif ylabel: 
+		plt.ylabel(str(ylabel))
+
+	plt.imshow(im,cmap='gray')
+	plt.show()
+
+def cv_plot(img,title= ' ',convert_BGR=False):
+	"""
+	Simple cv based image plotter. 
+	Plots grays and colored images 
+	easier without having to specify. 
+
+	im:: BGR image
+	returns:img 
+	"""
+	if convert_BGR: img= rgb2bgr(img)
 	cv2.imshow(title,img)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def plot_hist(gray):
+def plot_hist(gray,hist_density_thresh=None,show=True):
 
+	if len(gray.shape)>2:
+		warnings.warn('Gray Scaling Image...')
+		gray= rgb2gray(gray)
+
+	if hist_density_thresh:
+		vals= hist_density(gray,thresh=hist_density_thresh)
+		title = '{:.2f}% of pixels are brighter {}'.format(vals[1]*100,hist_density_thresh)
+		plt.title(title)
+
+	else: plt.title('Color Histogram')
 	if len(gray.shape)>2:
 		raise ValueError('Must be Grey Scaled Image')
 	plt.hist(gray.ravel(), bins=256, fc='k', ec='k')
-	plt.show()
+	if hist_density_thresh: plt.axvline(hist_density_thresh)
+	if show: plt.show()
 
 def hist_density(gray,thresh=128):
+	"""
+	Illustrates the percent of images above
+	and below a set threshold. 
+
+	input:: gray scaled image
+	thresh:: threshold 
+
+	return (% below thresh, % above thresh)
+	"""
 	his = np.histogram(gray, np.arange(0,257))[0]
 	return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
 
 def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
+	"""
+	Basic Subplotting Function. 
+	
+	input: list of images 
+
+	returns subplot of images plotting next to each other
+
+	"""
 	if shape == None:
 		shape = [1, len(ims)]
 	if titles == None:
 	    titles =[str(" ") for i in range(len(ims))]
-
-
 	fig = plt.figure(1)
 	for i in range(1,len(ims)+1): 
 	    fig.add_subplot(shape[0],shape[1],i)
@@ -73,18 +119,6 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
 	    plt.imshow(ims[i-1],cmap =cmap)
 	plt.show()
 
-# def im_subplot(ims,shape=None,titles=None,cmap= 'gray'):
-# 	if shape == None:
-# 		shape = [1, len(ims)]
-# 	if titles == None:
-# 	    titles =[str(" ") for i in range(len(ims))]
-# 	for i in range(shape[0]):
-# 		for j in range(shape[1]):
-# 			print(i,j)
-# 			# plt.subplot2grid((shape[0],shape[1]), (i,j))
-# 			# plt.title(titles[i-1])
-# 			# plt.imshow(ims[i],cmap =cmap)
-# 	plt.show()
 
 def zoom_dup(img,factor=2):
 
@@ -98,6 +132,10 @@ def zoom_dup(img,factor=2):
 
 
 def cut(img,thresh=90):
+	"""
+	Set images above thresh to white 
+	and below to black 
+	"""
 	copy= img.copy()
 	copy[copy > thresh] = 255
 	copy[copy < thresh] = 0
@@ -127,7 +165,7 @@ def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
 
 def zero_pad(img,pad_len=2):
 	"""
-	Zero Pad and IMage 
+	Zero Pad image 
 	"""
 	return np.pad(img, (pad_len, pad_len), 'constant')
 
@@ -139,23 +177,28 @@ def __pad(vector, pad_width, iaxis, kwargs):
 
 def pad_with(img, pad_len=2, val=10):
 
-	return np.pad(img, pad_len, __pad, padder=val)
+	"""
+	pad image with set pad length and value 
+
+	"""
+
+	if pad_len==0:
+		return img 
+
+	if len(img.shape)>2:
+		dims = [img[:,:,0],img[:,:,1],img[:,:,2]]
+		final_padded = [] 
+		for dim in dims:
+			final_padded.append(np.pad(dim, pad_len, __pad, padder=val))
+		print(len(final_padded))
+		return np.stack(final_padded, axis=2)
+	else: 
+		return np.pad(img, pad_len, __pad, padder=val)
 
 def crop(img, x_left=0,x_right=0,y_bot=0,y_up=0):
 	"""
 	Crop function 
 	"""
 	return img[y_up:img.shape[0]-y_bot, x_left:img.shape[1]-x_right]	
-
-
-
-#tues 11-11:30 
-# shape= 3,4
-# for i in range(1,15): 
-# 	ct= shape[0]*100 + shape[1]*10 + i
-# 	if ct % 10 !=0: 
-# 		print(ct)
-# 		continue 
-# 	print('e')
 
 

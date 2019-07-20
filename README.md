@@ -13,7 +13,7 @@ import image_processing as imp
 from image_processing  import im_processing,color_adjust 
 from image_processing.face_detection import detect_faces #simple DNN/openCV based face detection 
 
-img = imp.im_processing.cv_read('image_processing/face_detection/test2.jpg') #load as RGB image 
+img = imp.im_processing.cv_read('image_processing/face_detection/test2.jpg',RGB=True) #load as RGB image 
 
 detected = detect_faces.detect(img,'image_processing/face_detection/deploy.prototxt.txt',
 	'image_processing/face_detection/res10_300x300_ssd_iter_140000.caffemodel',min_conf=.12) #load with appropriate pretrained models
@@ -35,7 +35,7 @@ import image_processing as imp
 from image_processing  import im_processing,color_adjust
 from image_processing.yolo import yolo #yolo DNN/openCV based 80-class classifier 
 
-img = imp.im_processing.cv_read('images/img_3.jpg')
+img = imp.im_processing.cv_read('images/img_3.jpg',RGB=True)
 
 detected =yolo.predict(img,model='image_processing/yolo/yolov2.weights', #load with appropriate pretrained models
 	config= 'image_processing/yolo/yolov2.cfg')
@@ -59,11 +59,11 @@ import image_processing as imp
 from image_processing  import im_processing,color_adjust #general image processing 
 import matplotlib.pyplot as plt
 
-img = imp.im_processing.cv_read('images/img_10.jpg') #load RGB 
+img = imp.im_processing.cv_read('images/img_10.jpg',RGB=True) #load RGB 
 
 gray= color_adjust.rgb2gray(img) #gray scale 
 
-padded= im_processing.pad_with(gray,pad_len=100,val=128) #pad img with set length and vals (current only works for grays)
+padded= im_processing.pad_with(gray,pad_len=100,val=128) #pad img with set length and vals (works for colors as well)
 
 zoomed = im_processing.zoom_dup(img,factor=2) #simple zoom by pixel duplication (only ints)
 
@@ -96,7 +96,7 @@ import image_processing as imp
 from image_processing  import im_processing,kernel
 import matplotlib.pyplot as plt
 
-img = imp.im_processing.cv_read('images/img_9.jpg') #load RGB 
+img = imp.im_processing.cv_read('images/img_9.jpg',RGB=True) #load RGB 
 
 guassian = kernel.gaussian_filter(img,kernel_size= 3 ,sigma=1) #guassian filter 
 
@@ -120,13 +120,9 @@ sharpen = sharp.sharpen() #normal sharpen filted
 
 extreme = sharp.excessive() #excessive sharpening 
 
-ims= [img,guassian,enhance,sharpen,extreme,high_pass,schnarr,sobel_x,sobel_y,laplacian, 
-]
+ims= [img,guassian,enhance,sharpen,extreme,high_pass,schnarr,sobel_x,sobel_y,laplacian]
 
-titles= ["Original Image","Guassian Filter","Enhanced Img","Sharpened Img",
- "Exessive Sharpening","High Pass Edge Filter",
-"Schnarr Edge Filter","sobel_x Edge Filter","sobel_y Edge Filter",
-"Laplacian Edge Filter"]
+titles= ["Original Image","Guassian Filter","Enhanced Img","Sharpened Img","Exessive Sharpening","High Pass Edge Filter","Schnarr Edge Filter","sobel_x Edge Filter","sobel_y Edge Filter","Laplacian Edge Filter"]
 
 plt.suptitle("Some Tools in Kernel Lib")
 imp.im_subplot(ims,shape=[3,4],titles=titles) #plot img subplot for comparison 
@@ -147,7 +143,7 @@ from image_processing  import im_processing,color_adjust,im_processing
 import matplotlib.pyplot as plt
 import numpy as np
 
-img = imp.im_processing.cv_read('images/einstein.jpg') #load RGB
+img = imp.im_processing.cv_read('images/einstein.jpg',RGB=True) #load RGB
 
 gray= color_adjust.rgb2gray(img)
 
