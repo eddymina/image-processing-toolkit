@@ -103,6 +103,12 @@ def grey_level_adjust(img,grey_levels):
 
 	return (img/grey_levels).astype(int)*grey_levels
 
+def brighten(img,alpha,beta):
+	"""
+	Simple brightness function based on 
+	brighted = alpha*img+beta
+	"""
+	return np.clip(alpha*img + beta, 0, 255).astype(int)
 
 
 
