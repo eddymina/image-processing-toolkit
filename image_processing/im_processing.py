@@ -12,10 +12,10 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
-from .color_adjust import rgb2gray,bgr2rgb,rgb2bgr
+from .color_adjust import rgb2gray,bgr2rgb,rgb2bgr,rgb2yiq
 import warnings 
 
-def cv_read(file_path,RGB=True):
+def cv_read(file_path,color_scale='RGB'):
 	"""
 	Read jpg,jpeg,png image files. 
 	Can be read as RGB or default 
@@ -28,8 +28,14 @@ def cv_read(file_path,RGB=True):
 	image= cv2.imread(str(file_path))
 	if image is None:
 		raise ValueError('No image found at {}'.format(file_path))
-	if RGB: return bgr2rgb(image)
-	else: return img 
+
+	if color_scale not in ['RGB','BGR','YIQ','GRAY']:
+		raise ValueError("Color Scale must be one of followng:: 'RGB','BGR','YIQ','GRAY'")
+	elif color_scale=='RGB': return bgr2rgb(image)
+	elif color_scale=='BGR': return img 
+	elif color_scale=='YIQ': return rgb2yiq(bgr2rgb(image))
+	elif color_scale=='GRAY': return rgb2gray(bgr2rgb(image))
+
 
 
 def plot_grey(im,title=None,xlabel=None,ylabel=None,convert_RGB=False):
@@ -69,6 +75,17 @@ def cv_plot(img,title= ' ',convert_BGR=False):
 	cv2.destroyAllWindows()
 
 def plot_hist(gray,hist_density_thresh=None,show=True):
+	"""
+	Generates an image histogram pixel intensities. An shows ratio
+
+	- Input:
+	     - im:: gray scaled image (np.array). Colored images are automatically gray scaled 
+	     - hist_density_thresh:: None. Else int in range [0, 255] that shows desired threshold
+	     - show:: show plot 
+
+	- Output:
+	     - histogram plot 
+     """
 
 	if len(gray.shape)>2:
 		warnings.warn('Gray Scaling Image...')
