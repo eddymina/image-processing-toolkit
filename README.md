@@ -2,6 +2,7 @@
 
 (beta)
 
+## Check out [wiki](https://github.com/eddymina/image-processing-toolkit/wiki)
 
 This is a simple image processing tool kit. It works by creating useful functions as well making pretrained classifiers easy to use. 
 
