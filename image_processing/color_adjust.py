@@ -1,16 +1,3 @@
-# -- color_adjust --
-
-# 	rgb2bgr(RGB)
-
-# 	bgr2rgb(BGR)
-
-# 	rgb2gray(rgb)
-
-# 	color_isolation(self,plot=False)
-
-# 	intensity_plot(self)
-
-# 	grey_level_adjust(self,grey_levels)
 
 import cv2
 import matplotlib.pyplot as plt 
@@ -51,17 +38,10 @@ def color_isolation(img):
 
 	dim = np.zeros(img.shape[0:2]).astype(int)
 	if len(img.shape)==2:
-	    R,G,B= img,img,img
-	    warnings.warn("Image should have 3 dims including color channels")
+	    return ("Image should have 3 dims including color channels")
 	else:
 	    R,G,B=img[:,:,0],img[:,:,1],img[:,:,2]
-
-	# if plot ==True:
-	# 	im_subplot ([np.stack((R,dim,dim), axis=2),np.stack((dim,G,dim), axis=2),
-	#             np.stack((dim,dim,B), axis=2)],shape=[1,3], 
-	#            titles=['R','G','B'] )
-	
-	return R,G,B
+	    return R,G,B
 
 def mean_subtraction(img,sig=1):
 
@@ -69,31 +49,49 @@ def mean_subtraction(img,sig=1):
 
 	return np.stack([(R-R.mean())/sig,(G-G.mean())/sig,(B-B.mean())/sig], axis=2)
 
+class intensity_plot:
 
-def intensity_plot(img):
-	
-    if len(img.shape) > 2:
-        raise ValueError("Image must be 2D grey scale")
-    # create the x and y coordinate arrays (here we just use pixel indices)
-    
-    xx, yy = np.mgrid[0:img.shape[0], 0:img.shape[1]]
+    def __init__(self,img,resize=.5,cmap='plasma'):
+        """
+        Create Intensity Plot Class 
 
-    # create the figure
-    fig=plt.figure(figsize=(15,10))
-    ax = fig.add_subplot(1, 2, 1)
-    plt.subplot(121)
-    ax.set_title('Resized Image')
-    plt.imshow(img)
-    ax = fig.add_subplot(1, 2, 2, projection='3d')
-    ax.set_title('Intensity Plot')
-    ax.plot_surface(xx, yy, img ,rstride=1, cstride=1, 
-            linewidth=0)
-    ax.grid(False)
-    ax.set_zticks([])
-    ax.view_init(85, 0)
-    plt.show()
+        """
+        if len(img.shape) > 2:
+            img = rgb2gray(img)
+            print("Image must be 2D grey scale... Gray Scaling...")
+        # create the x and y coordinate arrays (here we just use pixel indices)
+        self.img= img 
+        self.resize = resize
+        self.cmap=cmap
+        if self.resize and sum(img.shape)>250:
+            self.img = self.__resize()
+            print('Resizing {}....... New Shape'.format(img.shape),self.img.shape)
+        elif sum(img.shape)<250:
+        	print('Image too small to Resize ') 
+        self.xx, self.yy = np.mgrid[0:self.img.shape[0], 0:self.img.shape[1]]
+        
+        
+    def __resize(self, inter = cv2.INTER_AREA):
+        # initialize the dimensions of the image to be resized and grab the image size
+        dim = tuple([int(self.resize * i) for i in self.img.shape[0:2]])
+        # resize the image
+        return cv2.resize(self.img, (dim[1],dim[0]), interpolation = inter)
 
-def grey_level_adjust(img,grey_levels):
+    def show(self,view=(85, 0),title='Pixel Intensity',figsize=(15,10),plot=True):
+        # create the figure
+        fig=plt.figure(figsize=figsize)
+        ax = fig.add_subplot(1, 1, 1, projection='3d')
+        ax.set_title(str(title))
+        surf= ax.plot_surface(self.xx, self.yy, self.img ,rstride=1, cstride=1, cmap=self.cmap, linewidth=0, antialiased=False)
+        ax.view_init(view[0], view[1])
+        ax.grid(False)
+
+        cbar= fig.colorbar(surf, shrink=0.5, aspect=5)
+        cbar.set_label("Pixel Intensity")
+        ax.set_zticks([])
+        if plot: plt.show()
+
+def grey_level_adjust(img,grey_levels,plot=True):
 	"""
 	color_range= 2^(#bits)
 	Adjust grey scale color 
