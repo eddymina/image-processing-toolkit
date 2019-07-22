@@ -211,7 +211,6 @@ def pad_with(img, pad_len=2, val=10):
 		final_padded = [] 
 		for dim in dims:
 			final_padded.append(np.pad(dim, pad_len, __pad, padder=val))
-		print(len(final_padded))
 		return np.stack(final_padded, axis=2)
 	else: 
 		return np.pad(img, pad_len, __pad, padder=val)
