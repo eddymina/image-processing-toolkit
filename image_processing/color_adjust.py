@@ -90,6 +90,87 @@ class intensity_plot:
         cbar.set_label("Pixel Intensity")
         ax.set_zticks([])
         if plot: plt.show()
+        
+def plot_hist(img,hist_density_thresh=None,show=True):
+	"""
+	Generates an image histogram pixel intensities. An shows ratio
+
+	- Input:
+	     - im:: gray scaled image (np.array). Colored images are automatically gray scaled 
+	     - hist_density_thresh:: None. Else int in range [0, 255] that shows desired threshold
+	     - show:: show plot 
+
+	- Output:
+	     - histogram plot 
+     """
+
+	if len(img.shape)>2:
+		print('Colored Img')
+		R,G,B=img[:,:,0],img[:,:,1],img[:,:,2]
+		if hist_density_thresh:
+			vals_R= hist_density(R,thresh=hist_density_thresh)
+			title_R = '{:.2f}% of R pixels are brighter {}'.format(vals_R[1]*100,hist_density_thresh)
+			vals_G= hist_density(B,thresh=hist_density_thresh)
+			title_G = '{:.2f}% of G pixels are brighter {}'.format(vals_G[1]*100,hist_density_thresh)
+			vals_B= hist_density(G,thresh=hist_density_thresh)
+			title_B = '{:.2f}% of B pixels are brighter {}'.format(vals_B[1]*100,hist_density_thresh)
+			
+			plt.subplot(131)
+			plt.title(title_R)
+			plt.hist(R.ravel(), bins=256, color = "red")
+			plt.axvline(hist_density_thresh)
+			plt.ylabel('Freq of Pixel Intensity')
+			plt.xlabel('Pixel Initensity [0,255]')
+
+			plt.subplot(132)
+			plt.title(title_B)
+			plt.hist(B.ravel(), bins=256, color = "blue")
+			plt.axvline(hist_density_thresh)
+			plt.ylabel('Freq of Pixel Intensity')
+			plt.xlabel('Pixel Intensity [0,255]')
+
+			plt.subplot(133)
+			plt.title(title_B)
+			plt.hist(G.ravel(), bins=256,color = "green")
+			plt.axvline(hist_density_thresh)
+			plt.ylabel('Freq of Pixel Intensity')
+			plt.xlabel('Pixel Intensity [0,255]')
+			
+
+		else: 
+			plt.title('Color Histogram')
+			plt.hist(R.ravel(), bins=256, color = "red")
+			plt.hist(B.ravel(), bins=256, color = "blue")
+			plt.hist(G.ravel(), bins=256, color = "green")
+			plt.ylabel('Freq of Pixel Intensity')
+			plt.xlabel('Pixel Intensity [0,255]')
+
+		if show: plt.show()
+
+	else:
+		print('Img Assummed to be Gray')
+		if hist_density_thresh:
+			vals= hist_density(img,thresh=hist_density_thresh)
+			title = '{:.2f}% of pixels are brighter {}'.format(vals[1]*100,hist_density_thresh)
+			plt.title(title)
+
+		else: plt.title('Gray Histogram')
+		plt.hist(img.ravel(), bins=256, fc='k', ec='k')
+		if hist_density_thresh: plt.axvline(hist_density_thresh)
+		if show: plt.show()
+
+def hist_density(gray,thresh=128):
+	"""
+	Illustrates the percent of images above
+	and below a set threshold. 
+
+	input:: gray scaled image
+	thresh:: threshold 
+
+	return (% below thresh, % above thresh)
+	"""
+	his = np.histogram(gray, np.arange(0,257))[0]
+	return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
 
 def grey_level_adjust(img,grey_levels,plot=True):
 	"""

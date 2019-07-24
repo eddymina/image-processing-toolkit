@@ -131,6 +131,7 @@ class sharpen:
 		#process and output the image
 		return cv2.filter2D(self.img, -1, kernel)
 
+
 class canny:
 
 	"""
@@ -326,5 +327,19 @@ class canny:
 		self.suppressed = self.non_max_suppression(self.gradients, self.theta_matrix)
 		self.threshold= self.threshold(self.suppressed)
 		return self.hysteresis(self.threshold)
+
+#line finder 
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -32,7 +32,7 @@ def cv_read(file_path,color_scale='RGB'):
 	if color_scale not in ['RGB','BGR','YIQ','GRAY']:
 		raise ValueError("Color Scale must be one of followng:: 'RGB','BGR','YIQ','GRAY'")
 	elif color_scale=='RGB': return bgr2rgb(image)
-	elif color_scale=='BGR': return img 
+	elif color_scale=='BGR': return image
 	elif color_scale=='YIQ': return rgb2yiq(bgr2rgb(image))
 	elif color_scale=='GRAY': return rgb2gray(bgr2rgb(image))
 
@@ -74,47 +74,6 @@ def cv_plot(img,title= ' ',convert_BGR=False):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
-def plot_hist(gray,hist_density_thresh=None,show=True):
-	"""
-	Generates an image histogram pixel intensities. An shows ratio
-
-	- Input:
-	     - im:: gray scaled image (np.array). Colored images are automatically gray scaled 
-	     - hist_density_thresh:: None. Else int in range [0, 255] that shows desired threshold
-	     - show:: show plot 
-
-	- Output:
-	     - histogram plot 
-     """
-
-	if len(gray.shape)>2:
-		warnings.warn('Gray Scaling Image...')
-		gray= rgb2gray(gray)
-
-	if hist_density_thresh:
-		vals= hist_density(gray,thresh=hist_density_thresh)
-		title = '{:.2f}% of pixels are brighter {}'.format(vals[1]*100,hist_density_thresh)
-		plt.title(title)
-
-	else: plt.title('Color Histogram')
-	if len(gray.shape)>2:
-		raise ValueError('Must be Grey Scaled Image')
-	plt.hist(gray.ravel(), bins=256, fc='k', ec='k')
-	if hist_density_thresh: plt.axvline(hist_density_thresh)
-	if show: plt.show()
-
-def hist_density(gray,thresh=128):
-	"""
-	Illustrates the percent of images above
-	and below a set threshold. 
-
-	input:: gray scaled image
-	thresh:: threshold 
-
-	return (% below thresh, % above thresh)
-	"""
-	his = np.histogram(gray, np.arange(0,257))[0]
-	return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
 
 def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True):
 	"""
