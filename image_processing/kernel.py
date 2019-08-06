@@ -103,8 +103,6 @@ class sharpen:
 		self.img = img.astype(np.uint8)
 
 	def sharpen(self):
-
-
 		#generating the kernels
 		#kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
 		zero = np.zeros((3,3)).astype(int)
@@ -115,7 +113,6 @@ class sharpen:
 		return cv2.filter2D(self.img, -1, kernel)
 
 	def excessive(self):
-
 		#generating the kernels
 		kernel = np.array([[1,1,1], [1,-7,1], [1,1,1]])
 
@@ -123,7 +120,6 @@ class sharpen:
 		return cv2.filter2D(self.img, -1, kernel)
 
 	def edge_enhance(self):
-
 		#generating the kernels
 		kernel = np.array([[-1,-1,-1,-1,-1],
 		                           [-1,2,2,2,-1],
@@ -139,7 +135,6 @@ def template_match(img,template,thresh=None):
 	Algorithm that finds matching templates 
 	using correlation to find item that matches 
 	the provided template kernel. 
-
 	"""
 	res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
 	if thresh: loc = np.where(res >= thresh)
@@ -154,9 +149,7 @@ def template_match(img,template,thresh=None):
 	return copy
 
 class canny:
-
 	"""
-
 	Canny image edge detection algo:
 
 	4 parts:
@@ -166,52 +159,34 @@ class canny:
 	Sobel Filter (Gradient Computation)
 	Non-maximum Suppression 
 	Double Threshold 
-	Edge Tracknig by hystersis 
-
-
-
+	Edge Tracking by hystersis 
 	"""
-
-
 	def __init__(self,im,kernel_size=5,weak=25,strong=255):
 
 		if len(np.shape(im))!=2:
 
 			raise ValueError('**Must be 2D Grey Scale numpy.ndarray()\n')
 		self.img= im.astype(float)
-
-
 		self.kernel_size= kernel_size
 		self.weak= np.int32(weak)
 		self.strong = np.int32(strong)
 
-
-
 	def gaussian_filter(self,sigma=1):
-
 		"""
 		Apply (square) guassan kernel blur to image 
-
-
 		"""
-
 		size = int(self.kernel_size) // 2
 		x, y = np.mgrid[-size:size+1, -size:size+1]
 		normal = 1 / (2.0 * np.pi * sigma**2)
 		kernel = np.exp(-((x**2 + y**2) / (2.0*sigma**2))) * normal
-
 		return cv2.filter2D(self.img, -1, kernel)
 
 	def sobel_filters(self,img=None):
-
 		"""
 		Compute Intensity Gradient:: change in pixel intensity 
-
 		Applies filters that highlight intensity change along x and y axis 
-
 		Computes Gradient and Angle (Radians )
 		"""
-
 		if img is None:
 			img = self.img
 
@@ -226,31 +201,23 @@ class canny:
 		G = np.hypot(Ix, Iy) #SQRT of SUM of SQUARES
 		G = G / G.max() * 255 #norm to 8 bit
 		theta = np.arctan2(Iy, Ix)
-    
 		return (G, theta) #G is gradient matrix, and theta angle 
 
 	def non_max_suppression(self,gradients=None, theta_matrix=None):
 		"""
-
 		Edge thinning algo used when gradient filter is computed 
-
 		For every pixel gradient (g) and angle (a):
 			edge direction = line through pixel at angle a
 			if pixel on edge > current:
 				set pixel = 255 (white)
 				other pixels= 0 (black)
-
 		"""
-
 		if gradients is None and theta_matrix is None:
 			gradients, theta_matrix = self.sobel_filters()
-
-
 		M, N = gradients.shape
 		Z = np.zeros((M,N), dtype=np.int32)# create zero matix 
 		angle = theta_matrix * 180. / np.pi #convert to deg
 		angle[angle < 0] += 180 #add 180 wherever angle (-)
-
 
 		for i in range(1,M-1): #for all rows
 			for j in range(1,N-1): #for all columns 
@@ -284,21 +251,17 @@ class canny:
 				    pass
 		return Z
 
-
 	def threshold(self, img=None, lowThresholdRatio=0.05, highThresholdRatio=0.09):
 		"""
 		Set max pixel and min pixel intensity:
-
 		Strong pixel = p > max threshold  || ~ 10%+ of brightest pixel 
 		Weak pixel = max threshold  > p > min threshold  || ~ .05 * .09%  of brightest pixel 
 		Irrelvant Pixel=  min threshold  > p
-
 		Sets pixel vals to 0,min,and max vals 
 
 		"""
 		if img is None:
 			img = self.img
-
 
 		highThreshold = img.max() * highThresholdRatio;
 		lowThreshold = highThreshold * lowThresholdRatio;
@@ -321,7 +284,6 @@ class canny:
 		If strong pixel neighbors weak, convert weak to strong 
 
 		"""
-
 		if img is None:
 			img = self.img
 
@@ -348,19 +310,6 @@ class canny:
 		self.suppressed = self.non_max_suppression(self.gradients, self.theta_matrix)
 		self.threshold= self.threshold(self.suppressed)
 		return self.hysteresis(self.threshold)
-
-#line finder 
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -8,8 +8,8 @@
 # reveal the periodic nature of the image. # 
 ############################################
 
-
 import numpy as np
+from numpy import arctan2, fliplr, flipud
 import matplotlib.pyplot as plt
 from .color_adjust import rgb2gray,rgb2bgr
 from .kernel import gaussian_filter
@@ -71,13 +71,10 @@ def gen_line_im(size=(100,100),samp_freq=5,vert=True,checker=False,balance=False
 	if vert: return np.rot90(bal)
 	else: return bal
 
-
 class im_noise:
-
 	"""
 	Class of various forms of image noise
 	"""
-
 	def __init__(self,img):
 		self.img= img
 		if len(self.img.shape)==2:
@@ -91,7 +88,6 @@ class im_noise:
 		"""
 		Adding gausian distribution of noise
 		"""
-		
 		if self.color:
 			row,col,ch= self.img.shape
 			gauss = np.random.normal(mean,sigma,(row,col,ch))
@@ -106,7 +102,6 @@ class im_noise:
 		Add salt_pepper noise aka Replaces random pixels with 0 or 1.
 		s_vs_p:: ratio of salt/pepper
 		amount:: amount of noise
-
 		"""
 		copy = self.img.copy()
 		#Salt
@@ -130,9 +125,8 @@ class im_noise:
 		"""
 		Speck distribution of noise
 		Multiplicative noise using out = image + n*image,where
-                n is uniform noise with specified mean & variance.
+        n is uniform noise with specified mean & variance.
 		"""
-
 		if self.color:
 			row,col,ch= self.img.shape
 			gauss = np.random.randn(row,col,ch)
@@ -143,8 +137,6 @@ class im_noise:
 			gauss = np.random.randn(row,col)
 			gauss = gauss.reshape(row,col) 
 			return self.img + self.img * gauss
-
-
 class polar:
 
 	def __init__(self,img,resize= .1,plot=True,canny_min=100,canny_max=200,to_BGR=False):
@@ -209,7 +201,6 @@ class polar:
 	            rho = self.diag_len + int(round(edges_x[i] * cos[t_idx] + edges_y[i] * sin[t_idx]))
 	            accumulator[rho, t_idx] += 1
 
-
 	    if plot:
 	    	fig, ax = plt.subplots(1, 2, figsize=(10, 10))
 	    	ax[0].imshow(self.edge_im)
@@ -261,14 +252,6 @@ class polar:
 #         X_transformed = self.img.dot(eigenvectors)
         # return X_transformed
 
-
-
-
-
-
-
-import numpy as np
-from numpy import arctan2, fliplr, flipud
 
 
 def gradient(image, same_size=False):

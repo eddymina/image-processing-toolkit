@@ -31,7 +31,6 @@ def rgb2bgr(RGB):
 	R,G,B=RGB[:,:,0],RGB[:,:,1],RGB[:,:,2]
 	return np.stack([B,G,R], axis=2)
 
-
 def bgr2rgb(BGR):
 	"""
 	Convert BGR to RGB
@@ -51,14 +50,11 @@ def rgb2yiq(RGB,norm=True):
 	q = (0.21153661*R -0.52273617*G + 0.31119955*B)
 	return np.stack([y,i,q], axis=2)
 
-
 def color_isolation(img):  
 	"""
 	Takes in an image and isolates it into 
 	R,G,B color counter parts. 
-
 	"""
-
 	dim = np.zeros(img.shape[0:2]).astype(int)
 	if len(img.shape)==2:
 	    return ("Image should have 3 dims including color channels")
@@ -71,7 +67,6 @@ def mean_subtraction(img,sig=1):
 	Subtract individual color means and 
 	divide by a sigma (deviation)
 	"""
-
 	R,G,B= color_isolation(img)
 
 	return np.stack([(R-R.mean())/sig,(G-G.mean())/sig,(B-B.mean())/sig], axis=2)
@@ -80,7 +75,6 @@ class intensity_plot:
 	"""
 	Create Image Intensity Plot 
 	"""
-
     def __init__(self,img,resize=.5,cmap='plasma'):
         """
         Create Intensity Plot Class 
@@ -99,7 +93,6 @@ class intensity_plot:
         elif sum(img.shape)<250:
         	print('Image too small to Resize ') 
         self.xx, self.yy = np.mgrid[0:self.img.shape[0], 0:self.img.shape[1]]
-        
         
     def __resize(self, inter = cv2.INTER_AREA):
         # initialize the dimensions of the image to be resized and grab the image size
@@ -124,7 +117,6 @@ class intensity_plot:
 def plot_hist(img,hist_density_thresh=None,show=True):
 	"""
 	Generates an image histogram pixel intensities. An shows ratio
-
 	- Input:
 	     - im:: gray scaled image (np.array). Colored images are automatically gray scaled 
 	     - hist_density_thresh:: None. Else int in range [0, 255] that shows desired threshold
@@ -133,7 +125,6 @@ def plot_hist(img,hist_density_thresh=None,show=True):
 	- Output:
 	     - histogram plot 
      """
-
 	if len(img.shape)>2:
 		print('Colored Img')
 		R,G,B=img[:,:,0],img[:,:,1],img[:,:,2]
@@ -175,7 +166,6 @@ def plot_hist(img,hist_density_thresh=None,show=True):
 			plt.xlabel('Pixel Intensity [0,255]')
 
 		if show: plt.show()
-
 	else:
 		print('Img Assummed to be Gray')
 		if hist_density_thresh:
@@ -204,7 +194,6 @@ def hist_density(img,thresh=128):
 	flat = img.flatten()
 	return (flat < thresh).sum()/len(flat),(flat > thresh).sum()/len(flat)
 
-
 def grey_level_adjust(img,grey_levels,plot=True):
 	"""
 	color_range= 2^(#bits)
@@ -228,7 +217,6 @@ def auto_brighten(img,max_info_lost=.36,start_end=[.5,5],precision = .01,verbose
 	based on the % of information the user 
 	is willing for image to loss as saturated 
 	"""
-
 	alpha= 1
 	if len(img.shape)>2:
 		num_pixels= img.shape[0]*img.shape[1]*img.shape[2]
@@ -247,14 +235,11 @@ def auto_brighten(img,max_info_lost=.36,start_end=[.5,5],precision = .01,verbose
 
 	return np.clip(alpha*img, 0, 255).astype(int)
 
-
-
 def color_balance(img,percent=.4,to_BGR=True):
 	"""
 	Simple Color Balance Algo
 
 	"""
-
 	assert len(img.shape)==3
 	channels= [img[:,:,0],img[:,:,1],img[:,:,2]]
 
@@ -272,9 +257,5 @@ def color_balance(img,percent=.4,to_BGR=True):
 		balance[:,:,i]= cv2.normalize(copy,copy.copy(), 0, 255, cv2.NORM_MINMAX)
 	
 	return balance.astype(int)
-
-
-
-
 
 

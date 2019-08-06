@@ -36,8 +36,6 @@ def cv_read(file_path,color_scale='RGB'):
 	elif color_scale=='YIQ': return rgb2yiq(bgr2rgb(image))
 	elif color_scale=='GRAY': return rgb2gray(bgr2rgb(image))
 
-
-
 def plot_grey(im,title=None,xlabel=None,ylabel=None,to_RGB=False):
 	"""
 	Simple matplotlib image plotter. 
@@ -48,7 +46,6 @@ def plot_grey(im,title=None,xlabel=None,ylabel=None,to_RGB=False):
 	im:: RGB image numpy array only
 	returns:img 
 	"""
-
 	if to_RGB: im= bgr2rgb(im)
 	if title: 
 		plt.title(str(title))
@@ -83,14 +80,9 @@ def __get_grid_shape(l,max_range):
 def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True,to_RGB=False):
 	"""
 	Basic Subplotting Function. 
-	
 	input: list of images 
-
 	returns subplot of images plotting next to each other
-
 	"""
-
-
 	if shape == None:
 		if len(ims)<4:
 			shape = [1,len(ims)]
@@ -114,7 +106,6 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True,t
 	    plt.imshow(image,cmap =cmap)
 	if plot: plt.show()
 
-
 def zoom_dup(img,factor=2):
 
 	"""
@@ -124,7 +115,6 @@ def zoom_dup(img,factor=2):
 	x= np.repeat(x, factor, axis=1)
 	x= np.repeat(x, factor, axis=0)
 	return x
-
 
 def cut(img,thresh=90):
 	"""
@@ -157,7 +147,6 @@ def resize(image, width = None, height = None, inter = cv2.INTER_AREA):
     # resize the image
     return cv2.resize(image, dim, interpolation = inter)
 
-
 def zero_pad(img,pad_len=2):
 	"""
 	Zero Pad image 
@@ -171,14 +160,11 @@ def __pad(vector, pad_width, iaxis, kwargs):
 	return vector
 
 def pad_with(img, pad_len=2, val=10):
-
 	"""
 	pad image with set pad length and value 
-
 	"""
 	if pad_len==0:
 		return img 
-
 	if len(img.shape)>2:
 		dims = [img[:,:,0],img[:,:,1],img[:,:,2]]
 		final_padded = [] 
@@ -204,40 +190,31 @@ def rot45(array):
 	    for j in range(len(array[i])):
 	        #rot[i][int(i + j)] = array[i][j]
 	        rot[i][int(i + j)] = array[i][j]
-
 	return np.array(rot)
 
 class im_stats:
 	'''
 	Basic Image Stats Class 
 	'''
-
 	def __init__(self,img):
 		self.img,self.flat= img,img.flatten()
 		self.shape = img.shape
 		self.min,self.max=self.img.min(),self.img.max()
 			
-
 	def describe_all(self,per_channel=True):
 		"""
 		Show all stats options.
 		per_channels gives per channels stats if 
 		true and image is colored or has channels 
-
-
 		"""
-
 		if len(self.shape)==3:
 			ctype= '(Colored Image)'
 			self.color= True 
 		elif len(self.shape)==2:
 			ctype= '(Gray Image)'
 			self.color= None
-
 		print('########## Image Stats ##########')
 		print('Image Size',self.shape,'--->',ctype)
-
-
 		if per_channel and self.color:
 			channels = [self.img[:,:,0],self.img[:,:,1],self.img[:,:,2]]
 			for i,c in enumerate(channels):
@@ -257,9 +234,7 @@ class im_stats:
 		'''
 		General Stats including 
 		min,max, and root mean square 
-
 		'''
-	
 		print('Min:',self.min)
 		print('Max:',self.max)
 		self.rms=np.sqrt(np.sum(np.square(self.flat))/len(self.flat))
@@ -269,7 +244,6 @@ class im_stats:
 	def distrib_stat(self):
 		"""
 		Get Simple General Distribution stats 
-
 		"""
 		print('----------------------')
 		print('Distribution:')
@@ -283,7 +257,6 @@ class im_stats:
 		"""
 		Get Quartile Boxplot 
 		pixel intensity stats 
-
 		"""
 		print('----------------------')
 		print('Percentiles:')
@@ -296,23 +269,4 @@ class im_stats:
 			prev_perc = vals[0]-prev_perc
 			print(name[n],'{:.2f}% of pixels (~ {} < i < {})'.format((prev_perc)*100,previous,c))
 			previous=c
-
-
-
-			
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
