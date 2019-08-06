@@ -1,25 +1,48 @@
 
+############################################
+# Color Adjust::                           #
+# Various color analysis and adjustment    #
+# functions. This includes various color   #
+# scale changes, gray bit adjustment,      #
+# color distribution rebalancing and       #
+# intensity plots that allow of 3D Viz.    #
+# Also auto brightening options as well    #
+############################################
+
 import cv2
 import matplotlib.pyplot as plt 
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import math
 
 def rgb2gray(rgb):
+	"""
+	Take RGB and convert to Gray 
+	"""
     r, g, b = rgb[:,:,0], rgb[:,:,1], rgb[:,:,2]
     gray = 0.2989 * r + 0.5870 * g + 0.1140 * b
     return gray
 
 def rgb2bgr(RGB):
+	"""
+	Take RGB and convert to BGR (common format in openCV)
+	"""
 
 	R,G,B=RGB[:,:,0],RGB[:,:,1],RGB[:,:,2]
 	return np.stack([B,G,R], axis=2)
 
 
 def bgr2rgb(BGR):
+	"""
+	Convert BGR to RGB
+	"""
 	B,G,R= BGR[:,:,0],BGR[:,:,1],BGR[:,:,2]
 	return np.stack([R,G,B], axis=2)
 
 def rgb2yiq(RGB,norm=True):
+	"""
+	RGB to YIQ color scale 
+	"""
 	if norm:
 		RGB=RGB/255.0
 	R,G,B=RGB[:,:,0],RGB[:,:,1],RGB[:,:,2]
@@ -44,12 +67,19 @@ def color_isolation(img):
 	    return R,G,B
 
 def mean_subtraction(img,sig=1):
+	"""
+	Subtract individual color means and 
+	divide by a sigma (deviation)
+	"""
 
 	R,G,B= color_isolation(img)
 
 	return np.stack([(R-R.mean())/sig,(G-G.mean())/sig,(B-B.mean())/sig], axis=2)
 
 class intensity_plot:
+	"""
+	Create Image Intensity Plot 
+	"""
 
     def __init__(self,img,resize=.5,cmap='plasma'):
         """
@@ -90,7 +120,7 @@ class intensity_plot:
         cbar.set_label("Pixel Intensity")
         ax.set_zticks([])
         if plot: plt.show()
-        
+
 def plot_hist(img,hist_density_thresh=None,show=True):
 	"""
 	Generates an image histogram pixel intensities. An shows ratio
@@ -135,7 +165,6 @@ def plot_hist(img,hist_density_thresh=None,show=True):
 			plt.axvline(hist_density_thresh)
 			plt.ylabel('Freq of Pixel Intensity')
 			plt.xlabel('Pixel Intensity [0,255]')
-			
 
 		else: 
 			plt.title('Color Histogram')
@@ -159,7 +188,7 @@ def plot_hist(img,hist_density_thresh=None,show=True):
 		if hist_density_thresh: plt.axvline(hist_density_thresh)
 		if show: plt.show()
 
-def hist_density(gray,thresh=128):
+def hist_density(img,thresh=128):
 	"""
 	Illustrates the percent of images above
 	and below a set threshold. 
@@ -169,8 +198,12 @@ def hist_density(gray,thresh=128):
 
 	return (% below thresh, % above thresh)
 	"""
-	his = np.histogram(gray, np.arange(0,257))[0]
-	return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
+	# his = np.histogram(gray, np.arange(range[0],range[1]))[0]
+	# return np.sum(his[:thresh])/np.sum(his),np.sum(his[thresh:])/np.sum(his)
+
+	flat = img.flatten()
+	return (flat < thresh).sum()/len(flat),(flat > thresh).sum()/len(flat)
+
 
 def grey_level_adjust(img,grey_levels,plot=True):
 	"""
@@ -182,14 +215,63 @@ def grey_level_adjust(img,grey_levels,plot=True):
 
 	return (img/grey_levels).astype(int)*grey_levels
 
-def brighten(img,alpha,beta):
+def brighten(img,alpha=2.2,beta=50):
 	"""
 	Simple brightness function based on 
 	brighted = alpha*img+beta
 	"""
 	return np.clip(alpha*img + beta, 0, 255).astype(int)
 
+def auto_brighten(img,max_info_lost=.36,start_end=[.5,5],precision = .01,verbose=False):
+	"""
+	Simply brightening by mutiplication 
+	based on the % of information the user 
+	is willing for image to loss as saturated 
+	"""
 
+	alpha= 1
+	if len(img.shape)>2:
+		num_pixels= img.shape[0]*img.shape[1]*img.shape[2]
+	else: 
+		num_pixels= img.shape[0]*img.shape[1]
+	for a in np.arange(start_end[0],start_end[1],precision):
+		bright= a*img
+		info_lost =(bright>200).sum()/num_pixels
+		if verbose: print('Alpha:{:.2f} | Loss:{:.2f}%'.format(a,info_lost*100))
+		if info_lost<max_info_lost+precision and info_lost>max_info_lost-precision:
+			alpha= a 
+			print ('{:.2f}% image over saturated'.format(info_lost*100))
+			break 
+	if alpha ==1:
+		print('NO VALID ALPHA FOUND')
+
+	return np.clip(alpha*img, 0, 255).astype(int)
+
+
+
+def color_balance(img,percent=.4,to_BGR=True):
+	"""
+	Simple Color Balance Algo
+
+	"""
+
+	assert len(img.shape)==3
+	channels= [img[:,:,0],img[:,:,1],img[:,:,2]]
+
+	if to_BGR: img= rgb2bgr(img)
+	balance= np.zeros((img.shape))
+	for i,color in enumerate(channels): 
+		flat= np.sort(color.flatten())
+		low_val  = flat[math.floor(len(flat) * percent/2)]
+		high_val = flat[math.ceil( len(flat)  * (1.0 - percent/2))]
+
+		copy= color.copy()
+		copy[copy > high_val] = high_val
+		copy[copy < low_val] = low_val
+		
+		balance[:,:,i]= cv2.normalize(copy,copy.copy(), 0, 255, cv2.NORM_MINMAX)
+	
+	return balance.astype(int)
 
 
 

@@ -11,8 +11,9 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-from .color_adjust import rgb2gray
+from .color_adjust import rgb2gray,rgb2bgr
 from .kernel import gaussian_filter
+import cv2
 
 def magnitude_spectrum(img,plot=False):
 	"""
@@ -144,12 +145,121 @@ class im_noise:
 			return self.img + self.img * gauss
 
 
+class polar:
+
+	def __init__(self,img,resize= .1,plot=True,canny_min=100,canny_max=200,to_BGR=False):
+		
+		self.og_img = img 
+
+		if to_BGR:
+			print('Converting to CV BGR Format....')
+			img = rgb2bgr(img)
+
+		if len(img.shape)>2:
+			print('Colored Image... Gray Scaling....')
+			img= cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+		img = cv2.Canny(img,canny_min,canny_max) 
+		self.edge_im= img
+		print('Running Canny Edge Detection...')
+		dim = tuple([int(resize * i) for i in img.shape[0:2]])
+		print('Resizing to {}% of image...'.format(resize*100))
+		self.img = cv2.resize(img, (dim[1],dim[0]), interpolation =cv2.INTER_AREA)
+
+		self.diag_len = int((self.img.shape[0]**2+self.img.shape[1]**2)**(1/2))
+
+	def hough_line(self,angle_step=1,value_threshold=5,plot=True):
+	    """
+	    Hough transform for lines
+	    Input:
+	    img - 2D binary image with nonzeros representing edges
+	    angle_step - Spacing between angles to use every n-th angle
+	                 between -90 and 90 degrees. Default step is 1.
+	    lines_are_white - boolean indicating whether lines to be detected are white
+	    value_threshold - Pixel values above or below the value_threshold are edges
+	    Returns:
+	    accumulator - 2D array of the hough transform accumulator
+	    theta - array of angles used in computation, in radians.
+	    rhos - array of rho values. Max size is 2 times the diagonal
+	           distance of the input image.
+	    """
+	    # Rho and Theta ranges
+
+
+	    thetas = (np.arange(-90.0, 90.0, angle_step))*np.pi/180
+
+	    rhos = np.linspace(-self.diag_len, self.diag_len, self.diag_len * 2)
+
+	    # Cache some resuable values
+	    sin, cos = np.sin(thetas),np.cos(thetas)
+	  
+	    # Hough accumulator array of theta vs rho
+	    accumulator = np.zeros((len(rhos), len(thetas)), dtype=np.uint8)
+	   
+	    edges= self.img > value_threshold
+	    edges_y,edges_x= np.nonzero(edges)
+
+	    print('Translating Coordinated to Polar Space...')
+
+	    # Vote in the hough accumulator
+	    for i in range(len(edges_x)):
+
+	        for t_idx in range(len(thetas)):
+	            # Calculate rho. diag_len is added for a positive index
+	            rho = self.diag_len + int(round(edges_x[i] * cos[t_idx] + edges_y[i] * sin[t_idx]))
+	            accumulator[rho, t_idx] += 1
+
+
+	    if plot:
+	    	fig, ax = plt.subplots(1, 2, figsize=(10, 10))
+	    	ax[0].imshow(self.edge_im)
+	    	ax[0].set_title('Canny Grayscaled + Edged image')
+	    	ax[0].axis('image')
+
+	    	plt.imshow(
+	    	accumulator, cmap='ocean_r',
+	    	extent=[np.rad2deg(thetas[-1]), np.rad2deg(thetas[0]), rhos[-1], rhos[0]])
+	    	ax[1].set_aspect('equal', adjustable='box')
+	    	ax[1].set_title('Hough transform')
+	    	ax[1].set_xlabel('Angles (degrees)')
+	    	ax[1].set_ylabel('Distance (pixels)')
+	    	ax[1].axis('image')
+	    	plt.show()
+	    return accumulator, thetas, rhos
 
 
 
 
+# class im_PCA:
+#     """A method for doing dimensionality reduction by transforming the feature
+#     space to a lower dimensionality, removing correlation between features and
+#     maximizing the variance along each feature axis. This class is also used throughout
+#     the project to plot data.
+#     """
+#     def __init__(self,img): 
+#         self.img = img 
 
+#     def cv_matrix(self): 
+#         n_samples = np.shape(self.img)[0]
+#         covariance_matrix = (1 / (n_samples-1)) * (self.img - self.img.mean(axis=0)).T.dot(self.img - self.img.mean(axis=0))
+#         return covariance_matrix
+#     def transform(self, n_components):
+#         """ Fit the dataset to the number of principal components specified in the
+#         constructor and return the transformed dataset """
+#         covariance_matrix = self.cv_matrix()
 
+#         # Where (eigenvector[:,0] corresponds to eigenvalue[0])
+#         eigenvalues, eigenvectors = np.linalg.eig(covariance_matrix)
+
+#         # Sort the eigenvalues and corresponding eigenvectors from largest
+#         # to smallest eigenvalue and select the first n_components
+#         idx = eigenvalues.argsort()[::-1]
+#         eigenvalues = eigenvalues[idx][:n_components]
+#         eigenvectors = np.atleast_1d(eigenvectors[:, idx])[:, :n_components]
+
+#         # Project the data onto principal components
+#         X_transformed = self.img.dot(eigenvectors)
+        # return X_transformed
 
 
 

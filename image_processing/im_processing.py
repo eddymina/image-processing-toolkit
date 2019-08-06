@@ -12,7 +12,7 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt 
-from .color_adjust import rgb2gray,bgr2rgb,rgb2bgr,rgb2yiq
+from .color_adjust import rgb2gray,bgr2rgb,rgb2bgr,rgb2yiq,hist_density
 import warnings 
 
 def cv_read(file_path,color_scale='RGB'):
@@ -38,7 +38,7 @@ def cv_read(file_path,color_scale='RGB'):
 
 
 
-def plot_grey(im,title=None,xlabel=None,ylabel=None,convert_RGB=False):
+def plot_grey(im,title=None,xlabel=None,ylabel=None,to_RGB=False):
 	"""
 	Simple matplotlib image plotter. 
 	Takes in simple matplotlib args 
@@ -49,7 +49,7 @@ def plot_grey(im,title=None,xlabel=None,ylabel=None,convert_RGB=False):
 	returns:img 
 	"""
 
-	if convert_RGB: img= bgr2rgb(img)
+	if to_RGB: im= bgr2rgb(im)
 	if title: 
 		plt.title(str(title))
 	elif xlabel: 
@@ -74,8 +74,13 @@ def cv_plot(img,title= ' ',convert_BGR=False):
 	cv2.waitKey(0)
 	cv2.destroyAllWindows()
 
+def __get_grid_shape(l,max_range):
 
-def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True):
+	h= int(len(l)/max_range) + 1
+
+	return [h,max_range]
+
+def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True,to_RGB=False):
 	"""
 	Basic Subplotting Function. 
 	
@@ -85,8 +90,13 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True):
 
 	"""
 
+
 	if shape == None:
-		shape = [1, len(ims)]
+		if len(ims)<4:
+			shape = [1,len(ims)]
+		else:
+			shape= __get_grid_shape(ims,max_range=4)
+
 	if titles == None:
 	    titles =[str(" ") for i in range(len(ims))]
 
@@ -97,7 +107,11 @@ def im_subplot(ims,shape=None,titles=None,cmap= 'gray',suptitle=None,plot=True):
 	for i in range(1,len(ims)+1): 
 	    fig.add_subplot(shape[0],shape[1],i)
 	    plt.title(titles[i-1])
-	    plt.imshow(ims[i-1],cmap =cmap)
+	    if to_RGB: 
+	    	image= bgr2rgb(ims[i-1])
+	    else: 
+	    	image = ims[i-1]
+	    plt.imshow(image,cmap =cmap)
 	if plot: plt.show()
 
 
@@ -192,4 +206,113 @@ def rot45(array):
 	        rot[i][int(i + j)] = array[i][j]
 
 	return np.array(rot)
+
+class im_stats:
+	'''
+	Basic Image Stats Class 
+	'''
+
+	def __init__(self,img):
+		self.img,self.flat= img,img.flatten()
+		self.shape = img.shape
+		self.min,self.max=self.img.min(),self.img.max()
+			
+
+	def describe_all(self,per_channel=True):
+		"""
+		Show all stats options.
+		per_channels gives per channels stats if 
+		true and image is colored or has channels 
+
+
+		"""
+
+		if len(self.shape)==3:
+			ctype= '(Colored Image)'
+			self.color= True 
+		elif len(self.shape)==2:
+			ctype= '(Gray Image)'
+			self.color= None
+
+		print('########## Image Stats ##########')
+		print('Image Size',self.shape,'--->',ctype)
+
+
+		if per_channel and self.color:
+			channels = [self.img[:,:,0],self.img[:,:,1],self.img[:,:,2]]
+			for i,c in enumerate(channels):
+				i+=1
+				self.img=c
+				print('\n','-+---------Channel-------+',i,'\n')
+
+				self.general()
+				self.distrib_stat()
+				self.percentile()
+		else:
+			self.general()
+			self.distrib_stat()
+			self.percentile()	
+
+	def general(self):
+		'''
+		General Stats including 
+		min,max, and root mean square 
+
+		'''
+	
+		print('Min:',self.min)
+		print('Max:',self.max)
+		self.rms=np.sqrt(np.sum(np.square(self.flat))/len(self.flat))
+		print('RMS: {:.2f}'.format(self.rms))
+
+
+	def distrib_stat(self):
+		"""
+		Get Simple General Distribution stats 
+
+		"""
+		print('----------------------')
+		print('Distribution:')
+
+		half=(self.max)/2
+		print('Intensity: {:.2f} +/- {:.2f}'.format(self.img.mean(),self.img.std()))
+		vals = hist_density(self.img,half)
+		print('{:.2f}% of pixels > {}'.format(vals[1]*100,half))
+
+	def percentile(self):
+		"""
+		Get Quartile Boxplot 
+		pixel intensity stats 
+
+		"""
+		print('----------------------')
+		print('Percentiles:')
+		quarter,half,quarter_3,max_val= (self.max)/4,(self.max)/2,(3*self.max)/4,(self.max)
+		name,count = ['25% |','50% |','75% |','100%|'],[quarter,half,quarter_3,max_val]
+		previous =0 
+		prev_perc= 0 
+		for n,c in enumerate(count):
+			vals = hist_density(self.img,c)
+			prev_perc = vals[0]-prev_perc
+			print(name[n],'{:.2f}% of pixels (~ {} < i < {})'.format((prev_perc)*100,previous,c))
+			previous=c
+
+
+
+			
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

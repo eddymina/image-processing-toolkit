@@ -30,7 +30,7 @@ def np_convolve(image, kernel):
                 new_image[i][j] = np.sum(image[i:i+m, j:j+m]*kernel) 
     return new_image
 
-def cv_convolve2D(image,kernel):
+def cv_convolve(image,kernel):
 	"""
 	2D cv based convultion 
 	"""
@@ -65,7 +65,7 @@ class edge_filter:
 		"""
 		Simple kernel for edge detection 
 		"""
-		kernel = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]).astype(float)
+		kernel = np.array([[-1,-1,-1],[-1,8,-1],[-1,-1,-1]])
 		return cv2.filter2D(self.img, -1, kernel)
 
 	def schnarr_filter(self):
@@ -106,7 +106,10 @@ class sharpen:
 
 
 		#generating the kernels
-		kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+		#kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
+		zero = np.zeros((3,3)).astype(int)
+		zero[1,1]= 2
+		kernel = zero-1/9*np.ones((3,3))
 
 		#process and output the image
 		return cv2.filter2D(self.img, -1, kernel)
@@ -131,6 +134,24 @@ class sharpen:
 		#process and output the image
 		return cv2.filter2D(self.img, -1, kernel)
 
+def template_match(img,template,thresh=None):
+	"""
+	Algorithm that finds matching templates 
+	using correlation to find item that matches 
+	the provided template kernel. 
+
+	"""
+	res = cv2.matchTemplate(img,template,cv2.TM_CCOEFF_NORMED)
+	if thresh: loc = np.where(res >= thresh)
+	else: loc = np.where(res == res.max())
+
+	w, h = template.shape[:2]
+	copy=img.copy()
+	loc =tuple(zip(loc[0],loc[1]))
+	
+	for pt in loc:
+		cv2.rectangle(copy, pt, (pt[0] + w, pt[1] + h), (0,0,0), 3)
+	return copy
 
 class canny:
 
